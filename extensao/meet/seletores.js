@@ -12,6 +12,9 @@ var SELETORES_MEET = {
   ICONE_SAIR: 'call_end',
   ICONE_LEGENDA_DESLIGADA: 'closed_caption_off',
   ICONE_LEGENDA_LIGADA: 'closed_caption',
+  // O botão da barra que abre o painel "Legendas e tradução" (Meet de outubro/2026:
+  // o botão de legendas passou para dentro dele).
+  ICONE_PAINEL_LEGENDAS: 'translate_cc',
   // Área das legendas. Existe mesmo com elas desligadas. Não basta pegar a
   // primeira "região" da página: o chat, a lista de pessoas e a apresentação
   // também são regiões, e em 07/10 a extensão passou a observar uma delas no

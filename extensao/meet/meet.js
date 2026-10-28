@@ -337,14 +337,32 @@
     }
   }
 
+  const botaoDe = (el) => (el && (el.closest('button') || el)) || null
+  const iconeLegenda = () => icone(S.ICONE_LEGENDA_DESLIGADA) || icone(S.ICONE_LEGENDA_LIGADA)
+
   async function ligarLegendas() {
-    const achado = await Promise.race([
-      esperar(() => icone(S.ICONE_LEGENDA_DESLIGADA) || icone(S.ICONE_LEGENDA_LIGADA)),
+    // O Meet antigo deixa o botão de legendas na barra; o novo o guarda dentro do
+    // painel "Legendas e tradução", que só existe na página aberto.
+    const pronto = await Promise.race([
+      esperar(() => iconeLegenda() || icone(S.ICONE_PAINEL_LEGENDAS)),
       new Promise((r) => setTimeout(r, 60000))
     ])
-    if (!achado) return atualizarPilula('Não achei o botão de legendas')
-    if (config.automatico && achado.textContent.trim() === S.ICONE_LEGENDA_DESLIGADA) {
-      ;(achado.closest('button') || achado).click()
+    if (!pronto) return atualizarPilula('Não achei o botão de legendas')
+    let achado = iconeLegenda()
+    let painel = null
+    if (!achado) {
+      // Sem a opção de ligar sozinho, não mexe na tela do vendedor.
+      if (!config.automatico) return
+      painel = botaoDe(pronto)
+      painel.click()
+      achado = await Promise.race([esperar(iconeLegenda, 200), new Promise((r) => setTimeout(r, 5000))])
+      if (!achado) return atualizarPilula('Não achei o botão de legendas')
+    }
+    if (config.automatico && achado.textContent.trim() === S.ICONE_LEGENDA_DESLIGADA) botaoDe(achado).click()
+    // Fecha o painel que abrimos (se continuar aberto).
+    if (painel) {
+      await new Promise((r) => setTimeout(r, 800))
+      if (iconeLegenda()) painel.click()
     }
   }
 
@@ -388,7 +406,7 @@
           S[k] = d[k]
         } catch {}
       }
-      for (const k of ['ICONE_SAIR', 'ICONE_LEGENDA_DESLIGADA', 'ICONE_LEGENDA_LIGADA']) if (typeof d[k] === 'string' && d[k]) S[k] = d[k]
+      for (const k of ['ICONE_SAIR', 'ICONE_LEGENDA_DESLIGADA', 'ICONE_LEGENDA_LIGADA', 'ICONE_PAINEL_LEGENDAS']) if (typeof d[k] === 'string' && d[k]) S[k] = d[k]
       if (typeof d.ROTULO_LEGENDAS === 'string' && d.ROTULO_LEGENDAS) S.ROTULO_LEGENDAS = new RegExp(d.ROTULO_LEGENDAS, 'i')
       if (Array.isArray(d.VOCE) && d.VOCE.length) S.VOCE = d.VOCE
     } catch {}
